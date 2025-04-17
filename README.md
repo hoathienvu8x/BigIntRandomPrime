@@ -1,7 +1,7 @@
 # BigInt Random Prime
 
 > All code copy and modified from repo
-[Generate_Random_Prime_Number](https://github.com/dn9uy3n/Generate_Random_Prime_Number)
+[Generate Random Prime Number](https://github.com/dn9uy3n/Generate_Random_Prime_Number)
 author [Y4to](https://github.com/dn9uy3n)
 
 This is mini program to generate random prime number. It includes source

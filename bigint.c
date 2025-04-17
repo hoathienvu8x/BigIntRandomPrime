@@ -21,7 +21,7 @@ int bigint_equal(bigint a, bigint b) {
   }
   return 1;
 }
-// a < b
+/* a < b */
 int bigint_less(bigint a, bigint b) {
   size_t i = 0;
   for (i = BigInt_Size - 1; ; i--) {
@@ -31,7 +31,7 @@ int bigint_less(bigint a, bigint b) {
   }
   return 0;
 }
-// a <= b
+/* a <= b */
 int bigint_less_or_equal(bigint a, bigint b) {
   size_t i=0;
   for (i = BigInt_Size - 1; ; i--) {
@@ -41,7 +41,7 @@ int bigint_less_or_equal(bigint a, bigint b) {
   }
   return 1;
 }
-// a == 0
+/* a == 0 */
 int bigint_is_zero(bigint a) {
   size_t i = 0;
   for (i = 0; i < BigInt_Size; ++i) {
@@ -49,39 +49,39 @@ int bigint_is_zero(bigint a) {
   }
   return 1;
 }
-// a & 1 == 0
+/* a & 1 == 0 */
 int bigint_is_even(bigint a) {
   return (a[0] & 1) == 0;
 }
-// a & 1 == 1
+/* a & 1 == 1 */
 int bigint_is_odd(bigint a) {
   return (a[0] & 1) == 1;
 }
-// a = 0
+/* a = 0 */
 void bigint_zero(bigint a) {
   memset(a, 0, BigInt_Size);
 }
-// a = 1
+/* a = 1 */
 void bigint_one(bigint a) {
   bigint_zero(a);
   a[0] = 1;
 }
-// a = value
+/* a = value */
 void bigint_set(bigint a, size_t value) {
+  size_t i = 0;
   bigint_zero(a);
-  size_t i=0;
   while (value > 0 && i < BigInt_Size) {
     a[i] = value % BigInt_Base;
     value /= BigInt_Base;
     i++;
   }
 }
-// a = b
+/* a = b */
 void bigint_set_bigint(bigint a, bigint b) {
   bigint_zero(a);
   memcpy(a, b, BigInt_Size);
 }
-//b = b + a
+/* b = b + a */
 void bigint_add_bigint( bigint a, bigint b) {
   uint16_t x = 0;
   size_t i = 0;
@@ -91,7 +91,7 @@ void bigint_add_bigint( bigint a, bigint b) {
     x /= BigInt_Base;
   }
 }
-//b = b + a
+/* b = b + a */
 void bigint_add_int(uint8_t a, bigint b) {
   uint16_t x = a;
   size_t i = 0;
@@ -99,10 +99,10 @@ void bigint_add_int(uint8_t a, bigint b) {
     x = (uint16_t) b[i] + x;
     b[i] = x % BigInt_Base;
     x /= BigInt_Base;
-    if (x==0) break;
+    if (x == 0) break;
   }
 }
-//b = b - a
+/* b = b - a */
 void bigint_sub_bigint( bigint a, bigint b) {
   uint16_t r = 0;
   size_t i = 0;
@@ -129,11 +129,11 @@ void bigint_sub_int( uint8_t a, bigint b) {
     }
   }
 }
-//a = a << 8*sh (base 256)
+/* a = a << 8*sh (base 256) */
 void bigint_shl(bigint a, size_t sh) {
+  size_t i = 0;
   if (sh == 0) return;
   sh = bigint_min(BigInt_Size, sh);
-  size_t i = 0;
   for (i = BigInt_Size - 1; i >= sh; i--) {
     a[i] = a[i - sh];
   }
@@ -142,11 +142,11 @@ void bigint_shl(bigint a, size_t sh) {
     a[i] = 0;
   }
 }
-//a = a >> 8*sh (base 256)
+/* a = a >> 8*sh (base 256) */
 void bigint_shr(bigint a, size_t sh) {
+  size_t i = 0;
   if (sh == 0) return;
   sh = bigint_min(BigInt_Size, sh);
-  size_t i = 0;
   for (i = 0; i < BigInt_Size - sh; i++) {
     a[i] = a[i + sh];
   }
@@ -155,16 +155,17 @@ void bigint_shr(bigint a, size_t sh) {
     a[BigInt_Size - 1 - i] = 0;
   }
 }
-//a = a << sh
+/* a = a << sh */
 void bigint_shbl(bigint a, size_t sh) {
+  uint16_t mask = BigInt_Base - (1 << (BigInt_DigitBits - sh));
+  uint8_t bits0 = 0, bits1 = 0;
+  size_t i = 0;
+
   if (sh == 0) return;
 
   bigint_shl(a, sh / BigInt_DigitBits);
   sh = sh % BigInt_DigitBits;
 
-  uint16_t mask = BigInt_Base - (1 << (BigInt_DigitBits - sh));
-  uint8_t bits0 = 0, bits1 = 0;
-  size_t i = 0;
   for (i = 0; i < BigInt_Size; ++i) {
     bits1 = a[i] & mask;
     a[i] <<= sh;
@@ -172,16 +173,17 @@ void bigint_shbl(bigint a, size_t sh) {
     bits0 = bits1;
   }
 }
-// a = a >> sh
+/* a = a >> sh */
 void bigint_shbr(bigint a, size_t sh) {
+  uint16_t mask = (1 << sh) - 1;
+  uint8_t bits0 = 0, bits1 = 0;
+  size_t i = 0;
+
   if (sh == 0) return;
 
   bigint_shr(a, sh / BigInt_DigitBits);
   sh = sh % BigInt_DigitBits;
 
-  uint16_t mask = (1 << sh) - 1;
-  uint8_t bits0 = 0, bits1 = 0;
-  size_t i = 0;
   for (i = BigInt_Size - 1;; --i) {
     bits1 = a[i] & mask;
     a[i] >>= sh;
@@ -190,7 +192,7 @@ void bigint_shbr(bigint a, size_t sh) {
     if (i == 0) break;
   }
 }
-// b = b * a
+/* b = b * a */
 void bigint_mul_int( uint8_t a, bigint b) {
   uint16_t r = 0;
   size_t i = 0;
@@ -200,11 +202,12 @@ void bigint_mul_int( uint8_t a, bigint b) {
     r /= BigInt_Base;
   }
 }
-// p = a * b
+/* p = a * b */
 void bigint_mul_bigint( bigint a,  bigint b, bigint p) {
   bigint t;
-  bigint_zero(p);
   size_t i = 0;
+
+  bigint_zero(p);
   for (i = 0; i < BigInt_Size; ++i) {
     memcpy(t, b, BigInt_Size);
     bigint_mul_int(a[i], t);
@@ -212,21 +215,22 @@ void bigint_mul_bigint( bigint a,  bigint b, bigint p) {
     bigint_add_bigint(t, p);
   }
 }
-// b / a = q, b % a = r
+/* b / a = q, b % a = r */
 void bigint_div_bigint( bigint a,  bigint b, bigint q, bigint r) {
   bigint t;
+  size_t i = 0;
+  uint8_t k = 0;
 
   bigint_zero(q);
   bigint_zero(r);
   bigint_zero(t);
-  size_t i = 0;
 
   for (i = BigInt_Size - 1;; --i) {
     bigint_shl(r, 1);
     bigint_add_int(b[i], r);
     if (bigint_less_or_equal(a, r)) {
       bigint_zero(t);
-      uint8_t k = 0;
+      k = 0;
       do {
         ++k;
         bigint_add_bigint(a, t);
@@ -242,7 +246,7 @@ void bigint_div_bigint( bigint a,  bigint b, bigint q, bigint r) {
   }
 }
 
-// b % a = r
+/* b % a = r */
 void bigint_mod_bigint2( bigint a,  bigint b, bigint r) {
   bigint q;
   bigint_div_bigint(a,b,q,r);
@@ -295,17 +299,17 @@ void bigint_mod_bigint(bigint a, bigint b, bigint r) {
     if (i == 0) break;
   }
 }
-// b % a = r
+/* b % a = r */
 void bigint_mod_int(size_t a,  bigint b, size_t *r) {
-  *r = 0;
   size_t i = 0;
+  *r = 0;
   for (i = BigInt_Size - 1;; --i) {
     *r = (*r * BigInt_Base + b[i]) % a;
     if (i == 0) break;
   }
 }
 
-// generate random number a
+/* generate random number a */
 void bigint_rand(bigint a) {
   size_t i = 0;
   srand(time(0));
@@ -313,7 +317,7 @@ void bigint_rand(bigint a) {
     a[i] = rand() % BigInt_Base;
   }
 }
-// generate random number a < b
+/* generate random number a < b */
 void bigint_rand_range(bigint a,  bigint b) {
   bigint t, q;
 
@@ -404,7 +408,7 @@ void bigint_rand_prime(bigint a, int nbits) {
     }
   }
 }
-// r = a^x mod n
+/* r = a^x mod n */
 void bigint_pow_mod(bigint a, bigint x,  bigint n, bigint r) {
   bigint t;
 
@@ -424,6 +428,8 @@ void bigint_pow_mod(bigint a, bigint x,  bigint n, bigint r) {
 void bigint_print_format( char * pref, bigint x, int printBytes) {
   size_t n = 0, i;
   bigint _10, q, r;
+  char str[4096];
+
   for (n = BigInt_Size - 1; ; --n) {
     if (x[n] != 0) break;
     if (n == 0) break;
@@ -438,7 +444,6 @@ void bigint_print_format( char * pref, bigint x, int printBytes) {
   }
 
   bigint_set(_10, 10);
-  char str[4096];
   memset(str, 0, sizeof(str));
 
   n = 0;
