@@ -9,7 +9,7 @@ static bigint bigint_lastnum;
 static size_t bigint_trials = 256;
 
 void bigint_set_trials(size_t trials) {
-  bigint_trials = trials;
+  bigint_trials = trials == 0 ? 3 : trials;
 }
 
 int bigint_equal(bigint a, bigint b) {
@@ -310,20 +310,33 @@ void bigint_mod_int(size_t a,  bigint b, size_t *r) {
 }
 
 /* generate random number a */
-void bigint_rand(bigint a) {
+void _bigint_rand(bigint a, int prime) {
   size_t i = 0;
   srand(time(0));
   for (i = 0; i < BigInt_Size; i++) {
-    a[i] = rand() % BigInt_Base;
+    if (i == 0) {
+      a[i] = (rand() % 9) + '1'; /* No leading zeros */
+    } else {
+      a[i] = rand() % BigInt_Base;
+    }
+  }
+  if (prime) {
+    a[BigInt_Size - 1] = (rand() % 5) * 2 + '1'; /* Last digit is odd */
   }
 }
+void bigint_rand(bigint a) {
+  _bigint_rand(a, 0);
+}
 /* generate random number a < b */
-void bigint_rand_range(bigint a,  bigint b) {
+void _bigint_rand_range(bigint a,  bigint b, int prime) {
   bigint t, q;
 
-  bigint_rand(a);
+  _bigint_rand(a, prime);
   bigint_set_bigint(t, a);
   bigint_div_bigint(b, t, q, a);
+}
+void bigint_rand_range(bigint a,  bigint b) {
+  _bigint_rand_range(a, b, 0);
 }
 void bigint_rand_prime(bigint a, int nbits) {
   static int smallPrimes[] = {
@@ -356,7 +369,7 @@ void bigint_rand_prime(bigint a, int nbits) {
 
   while (1) {
     if (bigint_is_zero(n)) {
-      bigint_rand_range(n, n_hi);
+      _bigint_rand_range(n, n_hi, 1);
       bigint_add_bigint(n_lo, n);
 
       if (bigint_is_even(n)) {
@@ -425,7 +438,7 @@ void bigint_pow_mod(bigint a, bigint x,  bigint n, bigint r) {
     bigint_mod_bigint(n, t, a);
   }
 }
-void bigint_print_format( char * pref, bigint x, int printBytes) {
+void bigint_print_format(char * pref, bigint x, int printBytes) {
   size_t n = 0, i;
   bigint _10, q, r;
   char str[4096];

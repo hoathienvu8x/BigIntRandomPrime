@@ -16,7 +16,9 @@ int main(int argc, char ** argv) {
 
   printf("Searching for %d-bit prime ...\n", nbits);
   bigint_rand_prime(prime, nbits);
-  bigint_print(prime);
+  printf("Found prime p:\n");
+  /* bigint_print(prime); */
+  bigint_print_format("p", prime, 1);
 
   return 0;
 }
